@@ -18,8 +18,11 @@
             //compatibility-layer
             //TODO: Silverligtht FileAPI Implementation
             window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-            Blob.prototype.slice = Blob.prototype.slice || Blob.prototype.webkitSlice || Blob.prototype.mozSlice;
-
+            //Blob.prototype.slice = Blob.prototype.slice || Blob.prototype.webkitSlice || Blob.prototype.mozSlice;
+            if(!base.fixBlobSlice()){
+                throw 'not_supported';
+            }
+            
             if(options.torrent) //if user set his torrent fields - merge them with our defaults
             { //$.extend won't merge objects with methods. so merging only torrent parts
                 options.torrent = $.extend(true, $.torrent.defaultOptions.torrent, options.torrent);
@@ -28,6 +31,51 @@
             base.options = $.extend({}, $.torrent.defaultOptions, options);
         };
         
+        /** Thanks dmitry-dedukhin/lightweight-uploader **/
+        base.fixBlobSlice = function() {
+            if(window.Blob) {
+                var origBlobSlice, origFileSlice, test_blob;
+                if(Blob.prototype.slice) { // method exists, let's check it
+                    if(window.BlobBuilder) {
+                        test_blob = (new BlobBuilder()).append("abc").getBlob();
+                    } else {
+                        return false;
+                    }
+                    if(test_blob && test_blob.slice(1, 1).size != 0) { // slice is an old-semantic slice
+                        origBlobSlice = Blob.prototype.slice;
+                        Blob.prototype.slice = function(start, end, contentType) {
+                            return origBlobSlice.apply(this, [start, end - start, contentType]);
+                        };
+                        if(File.prototype.slice !== Blob.prototype.slice) { // this is needed for Firefox 4.0.0
+                            origFileSlice = File.prototype.slice;
+                            File.prototype.slice = function(start, end, contentType) {
+                                return origFileSlice.apply(this, [start, end - start, contentType]);
+                            };
+                        }
+                        return true;
+                    }
+                    return false;
+                } else if(Blob.prototype.webkitSlice || Blob.prototype.mozSlice) { // new-semantic function, just use it
+                    /*
+                    // We can't do like this because of in FF we get exception "Illegal operation on WrappedNative prototype object" while calling fake slice method
+                    origBlobSlice = Blob.prototype.webkitSlice || Blob.prototype.mozSlice;
+                    Blob.prototype.slice = function(start, end, contentType) {
+                        return origBlobSlice.apply(this, [start, end, contentType]);
+                    }
+                    */
+                    if(Blob.prototype.webkitSlice) {
+                        origBlobSlice = 'webkitSlice';
+                    } else if(Blob.prototype.mozSlice) {
+                        origBlobSlice = 'mozSlice';
+                    }
+                    Blob.prototype.slice = function(start, end, contentType) {
+                        return this[origBlobSlice].apply(this, [start, end, contentType]);
+                    };
+                    return true;
+                }
+                return false;
+            }
+        };
         base.hexToBlob =  function(string)
         {
             var result = new Uint8Array(Math.ceil(string.length/2));
