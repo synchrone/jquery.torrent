@@ -1,0 +1,11 @@
+jQuery plugin for client side torrent file creation using HTML5 FileAPI
+Yes, it's terribly slow compared to native torrent generator applications, but hey, we're in the browser world!
+
+Works with browsers listed at:
+http://caniuse.com/#search=blobbuilder
+
+Thanks:
+Dmitry Dedukhin (https://github.com/dmitry-dedukhin) for Blob.slice fixing code
+Chris Veness (http://www.movable-type.co.uk/scripts/sha1.html) for sha1 implementation
+Andrej A Antonov (https://github.com/polymorphm) for various javascript tips
+Alexis Deveria (http://a.deveria.com/) for that awesome When Can I Use site

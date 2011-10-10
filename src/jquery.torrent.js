@@ -38,23 +38,22 @@
                 if(Blob.prototype.slice) { // method exists, let's check it
                     if(window.BlobBuilder) {
                         test_blob = (new BlobBuilder()).append("abc").getBlob();
-                    } else {
-                        return false;
-                    }
-                    if(test_blob && test_blob.slice(1, 1).size != 0) { // slice is an old-semantic slice
-                        origBlobSlice = Blob.prototype.slice;
-                        Blob.prototype.slice = function(start, end, contentType) {
-                            return origBlobSlice.apply(this, [start, end - start, contentType]);
-                        };
-                        if(File.prototype.slice !== Blob.prototype.slice) { // this is needed for Firefox 4.0.0
-                            origFileSlice = File.prototype.slice;
-                            File.prototype.slice = function(start, end, contentType) {
-                                return origFileSlice.apply(this, [start, end - start, contentType]);
+
+                        if(test_blob && test_blob.slice(1, 1).size != 0) { // slice is an old-semantic slice
+                            origBlobSlice = Blob.prototype.slice;
+                            Blob.prototype.slice = function(start, end, contentType) {
+                                return origBlobSlice.apply(this, [start, end - start, contentType]);
                             };
+                            if(File.prototype.slice !== Blob.prototype.slice) { // this is needed for Firefox 4.0.0
+                                origFileSlice = File.prototype.slice;
+                                File.prototype.slice = function(start, end, contentType) {
+                                    return origFileSlice.apply(this, [start, end - start, contentType]);
+                                };
+                            }
+                            return true;
                         }
-                        return true;
                     }
-                    return false;
+
                 } else if(Blob.prototype.webkitSlice || Blob.prototype.mozSlice) { // new-semantic function, just use it
                     /*
                     // We can't do like this because of in FF we get exception "Illegal operation on WrappedNative prototype object" while calling fake slice method
@@ -73,7 +72,6 @@
                     };
                     return true;
                 }
-                return false;
             }
         };
         base.hexToBlob =  function(string)
