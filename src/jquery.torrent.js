@@ -99,6 +99,8 @@
 
             var chunksNumber = 0;
             var chunkSize = info['piece length'];
+            var offset = 0;
+            var chunkId = 0;
 
             for (var i = 0, file; file = base.el.files[i]; ++i)
             {
@@ -122,12 +124,8 @@
                         ;
                 }
                 chunksNumber += Math.ceil(file.size / chunkSize);
-            }
 
-            var offset = 0;
-            var chunkId = 0;
-            for (var j = 0, file; file = base.el.files[j]; ++j)
-            {
+
                 offset = 0; //setting offset for a new file
                 var chunk = file.slice(offset,chunkSize);
 
