@@ -167,7 +167,7 @@
         };
 
         base.onProgressChanged = function(e){
-            base.options.onProgressChanged.call(this,e); //call user event
+            base.options.onProgressChanged.call(base.el,e); //call user event
 
             var torrent = base.options.torrent;
             if(e.done == e.all){ //this was last piece, hence we are making Blob out of them
@@ -177,7 +177,7 @@
                     pieces.append(piece);
                 }
                 torrent.info.pieces = pieces.getBlob();
-                base.options.onTorrentCreated.call(this, bencode(torrent)); //call user event
+                base.options.onTorrentCreated.call(base.el, bencode(torrent)); //call user event
             }
         };
 
